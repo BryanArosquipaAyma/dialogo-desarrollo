@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 
 const TIPOS_PERMITIDOS = [
-  "image/jpeg", "image/png", "image/webp", "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
   "application/pdf",
 ];
 
@@ -33,21 +35,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const dir = path.join(process.cwd(), "public", "uploads", carpeta);
-    await mkdir(dir, { recursive: true });
-
     const timestamp = Date.now();
     const nombreLimpio = file.name
       .toLowerCase()
       .replace(/[^a-z0-9.-]/g, "-")
       .replace(/-+/g, "-");
-    const nombreFinal = `${timestamp}-${nombreLimpio}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const nombreFinal = `${carpeta}/${timestamp}-${nombreLimpio}`;
 
-    await writeFile(path.join(dir, nombreFinal), buffer);
+    const blob = await put(nombreFinal, file, {
+      access: "public",
+    });
 
-    const url = `/uploads/${carpeta}/${nombreFinal}`;
-    return NextResponse.json({ ok: true, url });
+    return NextResponse.json({ ok: true, url: blob.url });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
