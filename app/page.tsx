@@ -347,3 +347,5 @@ export default async function HomePage() {
     </div>
   );
 }
+
+// Rediseño del inicio aplicado el 25/09/2026
