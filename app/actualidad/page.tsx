@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { pool } from "@/lib/db";
 
 async function getNoticias() {
@@ -43,7 +45,7 @@ export default async function ActualidadPage() {
                   <img
                     src={n.foto}
                     alt={n.titulo}
-                    className="h-48 w-full object-cover transition group-hover:opacity-90"
+                    className="h-48 w-full object-cover"
                   />
                 ) : (
                   <div className="h-48 w-full bg-gray-200" />
