@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import slugify from "slugify";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const [rows]: any = await pool.query(
       `SELECT r.*, a.nombres AS autor_nombres
        FROM reportajes r
        LEFT JOIN autores a ON r.autor_id = a.id
        WHERE r.id = ?`,
-      [params.id]
+      [id]
     );
     if (!rows.length) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -17,7 +18,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
     const [fotos]: any = await pool.query(
       "SELECT * FROM reportajes_fotos WHERE reportaje_id = ? ORDER BY orden ASC",
-      [params.id]
+      [id]
     );
 
     return NextResponse.json({ ok: true, reportaje: rows[0], fotos });
@@ -26,7 +27,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const b = await req.json();
 
@@ -40,7 +42,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
        WHERE id = ?`,
       [
         b.titulo,
-        `${slugBase}-${params.id}`,
+        `${slugBase}-${id}`,
         b.resumen_corto || null,
         b.desarrollo,
         b.foto_principal || null,
@@ -49,7 +51,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         b.es_destacado ? 1 : 0,
         b.estado || "borrador",
         b.autor_id || null,
-        params.id,
+        id,
       ]
     );
 
@@ -59,9 +61,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
-    await pool.query("DELETE FROM reportajes WHERE id = ?", [params.id]);
+    await pool.query("DELETE FROM reportajes WHERE id = ?", [id]);
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

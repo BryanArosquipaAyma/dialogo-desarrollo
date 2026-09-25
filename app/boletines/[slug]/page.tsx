@@ -14,9 +14,10 @@ async function getBoletin(slug: string) {
 export default async function BoletinDetalle({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const b = await getBoletin(params.slug);
+  const { slug } = await params;
+  const b = await getBoletin(slug);
   if (!b) notFound();
 
   return (

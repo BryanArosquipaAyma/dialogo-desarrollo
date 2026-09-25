@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const [rows]: any = await pool.query(
       "SELECT id, nombres, ap_paterno, ap_materno, email, rol FROM usuarios WHERE id = ?",
-      [params.id]
+      [id]
     );
     if (!rows.length) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -17,14 +18,15 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const b = await req.json();
 
     // Verificar que el email no esté usado por otro usuario
     const [existe]: any = await pool.query(
       "SELECT id FROM usuarios WHERE email = ? AND id != ?",
-      [b.email, params.id]
+      [b.email, id]
     );
 
     if (existe.length) {
@@ -49,7 +51,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
           b.email,
           b.rol,
           hash,
-          params.id,
+          id,
         ]
       );
     } else {
@@ -65,7 +67,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
           b.ap_materno || null,
           b.email,
           b.rol,
-          params.id,
+          id,
         ]
       );
     }
@@ -76,12 +78,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     // Verificar que no sea el último admin
     const [user]: any = await pool.query(
       "SELECT rol FROM usuarios WHERE id = ?",
-      [params.id]
+      [id]
     );
 
     if (!user.length) {
@@ -100,7 +103,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
       }
     }
 
-    await pool.query("DELETE FROM usuarios WHERE id = ?", [params.id]);
+    await pool.query("DELETE FROM usuarios WHERE id = ?", [id]);
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
