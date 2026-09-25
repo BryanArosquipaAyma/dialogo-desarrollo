@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { pool } from "@/lib/db";
 
 async function getStats() {
@@ -16,6 +18,7 @@ async function getStats() {
   const [[videos]]: any = await pool.query(
     "SELECT COUNT(*) AS total FROM videos"
   );
+
   return {
     reportajes: reportajes.total,
     noticias: noticias.total,

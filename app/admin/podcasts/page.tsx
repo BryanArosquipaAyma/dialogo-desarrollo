@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { pool } from "@/lib/db";
 import AccionesPodcast from "./_components/AccionesPodcast";

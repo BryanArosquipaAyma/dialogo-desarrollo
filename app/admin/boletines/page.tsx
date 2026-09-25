@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { pool } from "@/lib/db";
 import AccionesBoletin from "./_components/AccionesBoletin";
